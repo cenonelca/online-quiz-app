@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+html {
+  color-scheme: light;
+  /* Raise the base font size site-wide (16px -> 18px) so every rem-based
+     Tailwind text size (text-sm, text-base, text-lg, ...) scales up
+     proportionally without having to touch every component. This was the
+     direct fix for "font sizes are too small" across PC/laptop/tablet/phone. */
+  font-size: 112.5%;
+}
+
+body {
+  background: #f8fafc;
+  color: #0f172a;
+  /* iOS Safari auto-zooms the page when a focused form field renders below
+     16px. Guaranteeing at least 1rem (18px with the html bump above) on all
+     form controls keeps that from happening, on top of just being more
+     readable on a phone. Component-level classes (text-base, text-lg, etc.)
+     can still size things up further. */
+}
+
+input,
+select,
+textarea {
+  font-size: max(1rem, 16px);
+}
+
+@layer utilities {
+  .no-select {
+    user-select: none;
+  }
+}
