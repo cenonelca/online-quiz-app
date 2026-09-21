@@ -477,19 +477,20 @@ function buildScoreEmailHtml(
 /**
  * Emails every student with a submitted/graded attempt and an institutional
  * email on file their score plus the full question-by-question answer key,
- * using Resend. Also releases the quiz's scores (if not already released)
+ * using Mailjet. Also releases the quiz's scores (if not already released)
  * so the same information stays available on the self-serve /check-score
  * page afterwards.
  */
 export async function sendScoreEmails(quizId: string) {
   const { supabase } = await requireUser();
 
-  const apiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.RESEND_FROM_EMAIL;
-  if (!apiKey || !fromEmail) {
+  const apiKey = process.env.MAILJET_API_KEY;
+  const secretKey = process.env.MAILJET_SECRET_KEY;
+  const fromEmail = process.env.MAILJET_FROM_EMAIL;
+  if (!apiKey || !secretKey || !fromEmail) {
     return {
       error:
-        "Email sending isn't set up yet — RESEND_API_KEY and RESEND_FROM_EMAIL need to be configured for this app.",
+        "Email sending isn't set up yet — MAILJET_API_KEY, MAILJET_SECRET_KEY, and MAILJET_FROM_EMAIL need to be configured for this app.",
     };
   }
 
@@ -519,6 +520,10 @@ export async function sendScoreEmails(quizId: string) {
     return { error: "No submitted attempts with a UP email on file yet." };
   }
 
+  const authHeader = `Basic ${Buffer.from(`${apiKey}:${secretKey}`).toString(
+    "base64"
+  )}`;
+
   let sent = 0;
   const failed: string[] = [];
 
@@ -526,20 +531,26 @@ export async function sendScoreEmails(quizId: string) {
     if (!attempt.student_email) continue;
     const html = buildScoreEmailHtml(quiz, questions || [], attempt);
     try {
-      const res = await fetch("https://api.resend.com/emails", {
+      const res = await fetch("https://api.mailjet.com/v3.1/send", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: authHeader,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: fromEmail,
-          to: [attempt.student_email],
-          subject: `Your score for "${quiz.title}"`,
-          html,
+          Messages: [
+            {
+              From: { Email: fromEmail, Name: "Online Quiz with Timer" },
+              To: [{ Email: attempt.student_email }],
+              Subject: `Your score for "${quiz.title}"`,
+              HTMLPart: html,
+            },
+          ],
         }),
       });
-      if (res.ok) {
+      const data = await res.json().catch(() => null);
+      const status = data?.Messages?.[0]?.Status;
+      if (res.ok && status === "success") {
         sent++;
       } else {
         failed.push(attempt.student_email);
