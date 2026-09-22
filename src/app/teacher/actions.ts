@@ -343,6 +343,22 @@ export async function gradeEssay(
 }
 
 /**
+ * Permanently deletes one student's attempt (answers and proctoring events
+ * go with it via cascade). Use this to let a student who disconnected or
+ * needs a redo rejoin under the same name without hitting the quiz's
+ * max-attempts limit. This cannot be undone.
+ */
+export async function deleteAttempt(quizId: string, attemptId: string) {
+  const { supabase } = await requireUser();
+  const { error } = await supabase.rpc("delete_attempt", {
+    p_attempt_id: attemptId,
+  });
+  if (error) return { error: error.message };
+  revalidatePath(`/teacher/quizzes/${quizId}/results`);
+  return { success: "Attempt deleted." };
+}
+
+/**
  * "Release" a quiz's scores: once released, students can look up their own
  * graded score (and the full answer key) on the student site's
  * /check-score page via `get_released_score`, keyed by their passkey +
