@@ -595,6 +595,92 @@ export async function sendScoreEmails(quizId: string) {
   };
 }
 
+/**
+ * Emails a single student their score plus the full question-by-question
+ * answer key for one attempt, using Mailjet. Unlike sendScoreEmails this
+ * does not release the quiz's scores for everyone else — it's a direct,
+ * one-off send to just this student.
+ */
+export async function emailAttemptScore(quizId: string, attemptId: string) {
+  const { supabase } = await requireUser();
+
+  const apiKey = process.env.MAILJET_API_KEY;
+  const secretKey = process.env.MAILJET_SECRET_KEY;
+  const fromEmail = process.env.MAILJET_FROM_EMAIL;
+  if (!apiKey || !secretKey || !fromEmail) {
+    return {
+      error:
+        "Email sending isn't set up yet — MAILJET_API_KEY, MAILJET_SECRET_KEY, and MAILJET_FROM_EMAIL need to be configured for this app.",
+    };
+  }
+
+  const { data: quiz } = await supabase
+    .from("quizzes")
+    .select("*")
+    .eq("id", quizId)
+    .single<Quiz>();
+  if (!quiz) return { error: "Quiz not found." };
+
+  const { data: questions } = await supabase
+    .from("questions")
+    .select("*, choices(*)")
+    .eq("quiz_id", quizId)
+    .order("order_index", { ascending: true })
+    .returns<Question[]>();
+
+  const { data: attempt } = await supabase
+    .from("attempts")
+    .select("*, answers(*)")
+    .eq("id", attemptId)
+    .eq("quiz_id", quizId)
+    .single<Attempt & { answers: Answer[] }>();
+
+  if (!attempt) return { error: "Attempt not found." };
+  if (!attempt.student_email) {
+    return { error: `${attempt.student_name} doesn't have an email on file.` };
+  }
+  if (attempt.status === "in_progress") {
+    return { error: "This attempt hasn't been submitted yet." };
+  }
+
+  const html = buildScoreEmailHtml(quiz, questions || [], attempt);
+  const authHeader = `Basic ${Buffer.from(`${apiKey}:${secretKey}`).toString(
+    "base64"
+  )}`;
+
+  try {
+    const res = await fetch("https://api.mailjet.com/v3.1/send", {
+      method: "POST",
+      headers: {
+        Authorization: authHeader,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        Messages: [
+          {
+            From: { Email: fromEmail, Name: "Online Quiz with Timer" },
+            To: [{ Email: attempt.student_email }],
+            Subject: `Your score for "${quiz.title}"`,
+            HTMLPart: html,
+          },
+        ],
+      }),
+    });
+    const data = await res.json().catch(() => null);
+    const status = data?.Messages?.[0]?.Status;
+    if (!res.ok || status !== "success") {
+      return { error: `Could not send the email to ${attempt.student_email}.` };
+    }
+  } catch {
+    return { error: `Could not send the email to ${attempt.student_email}.` };
+  }
+
+  revalidatePath(`/teacher/quizzes/${quizId}/results`);
+  return {
+    success: `Emailed ${attempt.student_name} at ${attempt.student_email}.`,
+  };
+}
+
 function cellString(row: ExcelJS.Row, col: number): string {
   const v = row.getCell(col).value;
   if (v === null || v === undefined) return "";
