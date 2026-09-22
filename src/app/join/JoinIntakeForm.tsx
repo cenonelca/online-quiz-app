@@ -61,7 +61,7 @@ export default function JoinIntakeForm({
     <form onSubmit={handleSubmit} className="mt-5 space-y-4">
       <div>
         <label className="block text-sm font-medium text-slate-500 mb-1">
-          Passkey <span className="text-slate-400">(from your instructor)</span>
+          Passkey <span className="text-slate-400">(from your FIC)</span>
         </label>
         <input
           required
@@ -71,7 +71,6 @@ export default function JoinIntakeForm({
           className={`w-full text-center tracking-widest uppercase rounded-md border border-slate-300 px-3 py-3 text-lg font-mono ${
             lockCode ? "bg-slate-50 text-slate-600" : ""
           }`}
-          placeholder="e.g. AB3K9Z"
           maxLength={12}
         />
       </div>
@@ -105,7 +104,7 @@ export default function JoinIntakeForm({
 
       <div>
         <label className="block text-sm font-medium text-slate-500 mb-1">
-          Institutional email <span className="text-slate-400">(@up.edu.ph)</span>
+          Email <span className="text-slate-400">(@up.edu.ph)</span>
         </label>
         <input
           type="email"

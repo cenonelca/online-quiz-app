@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import JoinIntakeForm from "./JoinIntakeForm";
 
@@ -31,11 +30,8 @@ export default async function JoinPage({
     <main className="min-h-screen flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-4 text-center">
-          <Link href="/" className="font-semibold text-xl">
-            QuizTime
-          </Link>
-          <h1 className="mt-2 text-2xl sm:text-3xl font-bold">
-            {quiz ? quiz.title : "Start your quiz"}
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            {quiz ? quiz.title : "Online Quiz"}
           </h1>
           {quiz?.description && (
             <p className="mt-2 text-base text-slate-600 whitespace-pre-wrap">
@@ -67,12 +63,6 @@ export default async function JoinPage({
         <div className="bg-white border border-slate-200 rounded-lg p-6">
           <JoinIntakeForm initialCode={trimmedCode} />
         </div>
-        <p className="mt-4 text-center text-sm text-slate-500">
-          Already took this quiz?{" "}
-          <Link href="/check-score" className="underline hover:text-slate-700">
-            Check your score
-          </Link>
-        </p>
       </div>
     </main>
   );
