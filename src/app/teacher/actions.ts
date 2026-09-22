@@ -75,6 +75,30 @@ export async function updateQuizSettings(quizId: string, formData: FormData) {
   revalidatePath("/teacher");
 }
 
+/**
+ * Renames a quiz without touching any of its other settings (time limit,
+ * shuffle, max attempts, etc.). Used by the inline title editor on the quiz
+ * builder page as a lighter-weight alternative to updateQuizSettings, which
+ * expects the full settings form and would otherwise reset unrelated fields
+ * to their form defaults if called with just a title.
+ */
+export async function updateQuizTitle(quizId: string, title: string) {
+  const { supabase } = await requireUser();
+  const trimmed = title.trim();
+  if (!trimmed) return { error: "Title can't be empty." };
+
+  const { error } = await supabase
+    .from("quizzes")
+    .update({ title: trimmed })
+    .eq("id", quizId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/teacher/quizzes/${quizId}`);
+  revalidatePath("/teacher");
+  return { success: true };
+}
+
 export async function togglePublish(quizId: string, publish: boolean) {
   const { supabase } = await requireUser();
 
