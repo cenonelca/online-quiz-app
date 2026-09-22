@@ -34,7 +34,7 @@ export default function AttemptPage() {
   const [answers, setAnswers] = useState<Record<string, CurrentAnswer>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [now, setNow] = useState(Date.now());
-  const [result, setResult] = useState<{ score: number; max_score: number; has_pending_essay: boolean } | null>(
+  const [result, setResult] = useState<{ has_pending_essay: boolean } | null>(
     null
   );
   const [submitting, setSubmitting] = useState(false);
@@ -250,18 +250,19 @@ export default function AttemptPage() {
     return (
       <Centered>
         <h1 className="text-2xl font-bold">Quiz submitted</h1>
-        {result && !result.has_pending_essay && (
-          <p className="mt-2 text-xl">
-            Score: <span className="font-semibold">{result.score}</span> /{" "}
-            {result.max_score}
-          </p>
-        )}
-        {result?.has_pending_essay && (
+        {result?.has_pending_essay ? (
           <p className="mt-2 text-base text-slate-600">
-            Your objective questions are graded. Essay questions will be graded by
-            your professor.
+            Your objective questions have been recorded. Essay questions will be
+            graded by your professor.
+          </p>
+        ) : (
+          <p className="mt-2 text-base text-slate-600">
+            Your answers have been recorded.
           </p>
         )}
+        <p className="mt-2 text-sm text-slate-500">
+          Your score will be available once your instructor releases it.
+        </p>
         <p className="mt-4 text-base text-slate-500">You may now close this tab.</p>
       </Centered>
     );
