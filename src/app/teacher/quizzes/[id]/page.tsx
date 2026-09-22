@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { addQuestion, deleteQuiz } from "@/app/teacher/actions";
+import QuizTitleEditor from "./QuizTitleEditor";
 import QuizSettingsForm from "./QuizSettingsForm";
 import PublishControl from "./PublishControl";
 import QuestionCard from "./QuestionCard";
@@ -42,7 +43,7 @@ export default async function QuizBuilderPage({
           <Link href="/teacher" className="text-sm text-slate-500 hover:underline">
             ← All quizzes
           </Link>
-          <h1 className="text-2xl font-bold mt-1">{quiz.title || "Untitled quiz"}</h1>
+          <QuizTitleEditor quizId={quiz.id} title={quiz.title || "Untitled quiz"} />
         </div>
         <div className="flex items-center gap-2">
           <Link
