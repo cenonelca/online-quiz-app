@@ -85,7 +85,6 @@ export default function JoinIntakeForm({
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-base"
-            placeholder="Dela Cruz"
           />
         </div>
         <div>
@@ -97,7 +96,6 @@ export default function JoinIntakeForm({
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-base"
-            placeholder="Juan"
           />
         </div>
       </div>
@@ -114,7 +112,6 @@ export default function JoinIntakeForm({
           pattern="^[a-zA-Z0-9._%+-]+@up\.edu\.ph$"
           title="Must be a valid @up.edu.ph email address"
           className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-base"
-          placeholder="juan.delacruz@up.edu.ph"
         />
       </div>
 
@@ -128,7 +125,6 @@ export default function JoinIntakeForm({
             value={course}
             onChange={(e) => setCourse(e.target.value)}
             className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-base"
-            placeholder="BSIT-2A"
           />
         </div>
         <div>
@@ -140,7 +136,6 @@ export default function JoinIntakeForm({
             value={section}
             onChange={(e) => setSection(e.target.value)}
             className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-base"
-            placeholder="A"
           />
         </div>
       </div>
@@ -159,4 +154,4 @@ export default function JoinIntakeForm({
       </p>
     </form>
   );
-}
+                                                         }
